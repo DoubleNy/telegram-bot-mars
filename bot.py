@@ -118,6 +118,12 @@ def new_add(update, context):
         update.message.reply_text(text='You are not allowed to do this.', parse_mode=telegram.ParseMode.HTML)
 
 
+def see_all_adds(update, context):
+    adds = get_adds()
+
+    update.message.reply_text(text=f'{json.dumps(adds, indent=2)}', parse_mode=telegram.ParseMode.HTML)
+
+
 def get_current_add():
     global current_add_idx
 
@@ -236,6 +242,7 @@ def main():
     dp.add_handler(CommandHandler("time", tm_time))
     dp.add_handler(CommandHandler("t", tm_time))
     dp.add_handler(CommandHandler("new_add", new_add, pass_args=True, pass_user_data=True))
+    dp.add_handler(CommandHandler("all_adds", see_all_adds))
 
     # dp.add_handler(CommandHandler("price_bogged", priceB))
     # dp.add_handler(CommandHandler("p_bogged", priceB))

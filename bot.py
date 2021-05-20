@@ -5,8 +5,8 @@ import cloudscraper
 import json
 import datetime
 import requests
-import math
 import telegram
+import json
 
 from telegram.ext import Updater, CommandHandler
 
@@ -15,12 +15,42 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
 limit_time = 0
 
+# add_1 = "😎🌜 <a href='https://t.me/dopemoonofficial'> Dopemoon </a>❗️Not a SafeMoon Fork ❕No LP tokens to Dev wallet 🔥 Ownership Renounced🐰<a href='https://exchange.pancakeswap.finance/#/swap?outputCurrency=0xC03ff4EB23a8D59978C7fCd7720f952611ddd6E4'> PancakeSwap </a> | 🌳 <a href='https://linktr.ee/dopemoon'> LinkTree </a>"
+# add_2 = "⛔️👉This might be your last chance⚠️ to get <a href='https://bit.ly/2Qhucea'> $BTCR </a> 🎉 this cheap‼️Tax: | 4% Distributed 💸 | 3% Burn🔥| No Team Tokens ✅ | <a href='https://bit.ly/3y4HMTc'> Website. </a> Come have a 🐳 of a time 🥳"
+# add_3 = "👩 <a href='https://www.milf.finance/'> #MILF </a> is the most exciting new launch,  <a href='https://www.coingecko.com/en/coins/milf-finance'> Coingecko </a>💆‍♀, influencers 🤳, liq 🔐, ownership renounced 🙅‍♀, dev dox. <a href='https://exchange.pancakeswap.finance/#/swap?outputCurrency=0xCB7A1Dc3a40FB64eA57D297Cef439A103fc11E66'> BUY </a> 🏃🏼 ♀ <a href='https://t.me/milffinance_official'> TG </a> 🏃🏾‍♀BEWARE COPYCATS 🙎‍♀🤦‍♀"
+# add_4 = "<a href='https://t.me/x2pofficial'> X2POfficial </a> A New Revolution 💎 • LP Locked 🔒 • 6000 hodlers • 10 % to hodlers • Apple Giveaway ✅ • <a href='https://xenonpay.org/'> XenonPay.org </a>"
+# add_5 = " 👑<a href='https://bit.ly/3tTtEch'>United Emirate Decentralized Coin</a>👑 Supply Only 20M! Price=$0.01 💴 Make x100 🚀 Buy On <a href='https://bit.ly/3omXLHX'> PancakeSwap </a>"
 
-idx = 0
-ticks_update_time = 0
-last_hour_ticks = [0.01029474, 0.01029474, 0.01029474, 0.01029474, 0.01029474, 0.01029474]
+current_add_idx = 0
+
+ADDS_FILE_NAME = 'adds.json'
+
+
+def get_adds():
+    file = open(ADDS_FILE_NAME, 'r')
+    #
+    adds = json.load(fp=file)
+    #
+    file.close()
+
+    return adds
+
+
+def update_adds(add_to_add):
+    updated_adds = get_adds()
+
+    file = open(ADDS_FILE_NAME, 'w')
+
+    updated_adds['list'].append(add_to_add)
+    updated_adds['count'] = len(updated_adds['list'])
+
+    json.dump(updated_adds, file)
+
+    file.close()
+
 
 def get_change(current, previous):
     if current == previous:
@@ -44,6 +74,7 @@ def allow_reply():
 
     return current >= 5
 
+
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
@@ -54,8 +85,9 @@ def start(update, context):
 
 def help(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text(text='<b>/p</b> or <b>/price</b> shows the price for SAFESPACE from pancakeSwap.\n'
-                              '<b>/help</b> helps you in finding the commands supported by the bot\n',
+    update.message.reply_text(text='<b>/p</b> or <b>/price</b> shows the price for SAFEMARSCASH.\n'
+                                   '<b>/t</b> or <b>/time</b> Time until the bot will be released (anti-spam).\n'
+                                   '<b>/help</b> helps you in finding the commands supported by the bot.\n',
                               parse_mode=telegram.ParseMode.HTML
                               )
 
@@ -65,15 +97,35 @@ def tm_time(update, context):
 
     if not allow_reply():
         time = get_reply_time()
-        update.message.reply_text(text=f'Bot will be released in <b>{round(5 - time,1)}</b> <i>sec.</i>',
+        update.message.reply_text(text=f'Bot will be released in <b>{round(5 - time, 1)}</b> <i>sec.</i>',
                                   parse_mode=telegram.ParseMode.HTML)
 
         return
 
-    update.message.reply_text(text='Bot is waiting for your command...',  parse_mode=telegram.ParseMode.HTML)
+    update.message.reply_text(text='Bot is waiting for your command...', parse_mode=telegram.ParseMode.HTML)
 
 
-bs_scan_api_key = '41BHK17AWF7UHC7MU85F6IFFTIE6Y5P51G'
+def new_add(update, context):
+    add = ' '.join(context.args)
+
+    if update.message.from_user.username in ['RUSSELL829', 'doubleny']:
+        update_adds(add)
+        update.message.reply_text(text='Ok. I have just added it.', parse_mode=telegram.ParseMode.HTML)
+    else:
+        update.message.reply_text(text='You are not allowed to do this.', parse_mode=telegram.ParseMode.HTML)
+
+
+def get_current_add():
+    global current_add_idx
+
+    adds = get_adds()
+
+    current_add = adds['list'][current_add_idx]
+    current_add_idx += 1
+    current_add_idx = current_add_idx % len(adds['count'])
+
+    return current_add
+
 
 def price(update, context):
     today = datetime.date.today()
@@ -84,71 +136,74 @@ def price(update, context):
     if not allow_reply():
         return
 
-    # scraper = cfscrape.create_scraper()  # returns a CloudflareScraper instance
     scraper = cloudscraper.create_scraper()
 
-    # r = requests.get(url="https://api.pancakeswap.info/api/v2/tokens/0xe1DB3d1eE5CfE5C6333BE96e6421f9Bd5b85c987")
-    # response = r.json()
+    api_response = {}
 
-    response = {}
-    name = ''
-    price = 0
-    mcapp = 0
-    formatted_market_cap = 0
+    coin_name = ''
+    coin_price_usd = 0
+    coin_price_change = 0
+    coin_mcapp = 0
+    coin_mcapp_formatted = 0
+
     transactions_count = 0
     transactions_change = 0
+
     liquidity_usd = 0
-    liquidity_change = 0
+
     volume_usd = 0
     volume_change = 0
-    price_usd = 0
-    price_change = 0
-    err = False
+
+    coin_supply = 363.3
+    url_pancake = 'https://exchange.pancakeswap.finance/#/swap?outputCurrency=0xd948a2c11626a0efc25f4e0cea4986056ac41fed&inputCurrency=BNB'
+    url_bogged = 'https://bogged.finance/swap?token=0xd948A2c11626a0EFC25f4e0ceA4986056AC41feD'
+    url_dexguru = 'https://dex.guru/token/0xd948a2c11626a0efc25f4e0cea4986056ac41fed-bsc'
+    url_poocoin = 'https://poocoin.app/tokens/0xd948a2c11626a0efc25f4e0cea4986056ac41fed'
+
+    error_fetching = False
 
     try:
-        resJson = json.loads(scraper.get("https://api.dex.guru/v1/tokens/0xd948a2c11626a0efc25f4e0cea4986056ac41fed-bsc").text)
-        print(resJson)
-        name = resJson['symbol']
-        transactions_count = resJson['txns24h']
-        transactions_change = resJson['txns24hChange']
-        liquidity_usd = resJson['liquidityUSD']
-        # liquidity_change = resJson['liquidityChange24h']
-        volume_usd = resJson['volume24hUSD']
-        volume_change = resJson['volumeChange24h']
-        price = float(resJson['priceUSD'] * 1e6)
-        price_change = resJson['priceChange24h']
+        api_response = json.loads(
+            scraper.get("https://api.dex.guru/v1/tokens/0xd948a2c11626a0efc25f4e0cea4986056ac41fed-bsc").text)
 
-        mcapp = round(363.3 * 1e6 * price)
-        formatted_market_cap = "{:,}".format(mcapp)
-        supply = 363.3
+        coin_name = api_response['symbol']
+        coin_price = float(api_response['priceUSD'] * 1e6)
+        coin_price_change = api_response['priceChange24h']
+
+        coin_mcapp = round(coin_supply * 1e6 * coin_price)
+        coin_mcapp_formatted = "{:,}".format(coin_mcapp)
+
+        transactions_count = api_response['txns24h']
+        transactions_change = api_response['txns24hChange']
+
+        liquidity_usd = api_response['liquidityUSD']
+
+        volume_usd = api_response['volume24hUSD']
+        volume_change = api_response['volumeChange24h']
 
     except:
-        err = True
-        print("error")
-        name = response['data']['name']
-        price = float(response['data']['price']) * 1e6
-        mcapp = round(363.3 * 1e6 * price)
-        formatted_market_cap = "{:,}".format(mcapp)
+        error_fetching = True
+        coin_name = api_response['data']['coin_name']
+        coin_price = float(api_response['data']['coin_price']) * 1e6
+        coin_mcapp = round(coin_supply * 1e6 * coin_price)
+        coin_mcapp_formatted = "{:,}".format(coin_mcapp)
 
     limit_time = time.time()
 
-    urlPancake = 'https://exchange.pancakeswap.finance/#/swap?outputCurrency=0xd948a2c11626a0efc25f4e0cea4986056ac41fed&inputCurrency=BNB'
-    urlBogged = 'https://bogged.finance/swap?token=0xd948A2c11626a0EFC25f4e0ceA4986056AC41feD'
-    urlDexGuru = 'https://dex.guru/token/0xd948a2c11626a0efc25f4e0cea4986056ac41fed-bsc'
-    urlPoocoin = 'https://poocoin.app/tokens/0xd948a2c11626a0efc25f4e0cea4986056ac41fed'
     num_days = today - first_day
 
-    if not err:
-        update.message.reply_text(text=f"         🚀   {name}   🚀\n\n"
-                                           f"💰  1M tokens: <b>${round(price, 8)}</b><i>({round(price / price_change * 100)}% last 24h)</i> \n"
-                                           f"💴  Market cap: <b>${formatted_market_cap}</b> \n"
-                                           f"💬  Transactions count (24h): <b>{round(transactions_count)}</b><i>({round(transactions_change * 100)}% last 24h)</i>\n"
-                                           f"📊  Volume (24h): <b>${round(volume_usd)}</b><i>({round(volume_change * 100)}% last 24h)</i>\n"
-                                           f"💸  Liquidity (24h): <b>${round(liquidity_usd)}</b>\n"
-                                           f"🎚  Supply: <b>{supply}t</b> \n"
-                                           f"🔄 Buy/Sell on <a href='{urlPancake}'>PancakeSwapV2</a> | <a href='{urlBogged}'>Bogged</a> | <a href='{urlDexGuru}'> Dex Guru</a>\n"
-                                           f"〽️ Charts on 💩 <a href='{urlPoocoin}'>PancakeSwapV2</a> | 📈 <a href='{urlBogged}'>Bogged</a> | 🛠 <a href='{urlDexGuru}'> Dex Guru</a>\n"
-                                           f"⏰ Time Since Launch {num_days.days} days ago\n",
+    if not error_fetching:
+        update.message.reply_text(text=f"         🚀   {coin_name}   🚀\n\n"
+                                       f"💰  1M tokens: <b>${round(coin_price, 8)}</b><i>({round(coin_price / coin_price_change * 100)}% last 24h)</i> \n"
+                                       f"💴  Market cap: <b>${coin_mcapp_formatted}</b> \n"
+                                       f"💬  Transactions count (24h): <b>{round(transactions_count)}</b><i>({round(transactions_change * 100)}% last 24h)</i>\n"
+                                       f"📊  Volume (24h): <b>${round(volume_usd)}</b><i>({round(volume_change * 100)}% last 24h)</i>\n"
+                                       f"💸  Liquidity (24h): <b>${round(liquidity_usd)}</b>\n"
+                                       f"🎚  Supply: <b>{coin_supply}t</b> \n"
+                                       f"🔄  Buy/Sell on <a href='{url_pancake}'>PancakeSwapV2</a> | <a href='{url_bogged}'>Bogged</a> | <a href='{url_dexguru}'> Dex Guru</a>\n"
+                                       f"〽️  Charts on 💩 <a href='{url_poocoin}'>PancakeSwapV2</a> | 📈 <a href='{url_bogged}'>Bogged</a> | 🛠 <a href='{url_dexguru}'> Dex Guru</a>\n"
+                                       f"⏰  Time Since Launch {num_days.days} days ago\n\n"
+                                       f"<i>{get_current_add()}</i>\n",
                                   parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 
@@ -162,7 +217,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    #1773001800:AAHtAX5DUReFenUYgwpteZCfn4S66z-KFiY
+    # 1773001800:AAHtAX5DUReFenUYgwpteZCfn4S66z-KFiY
 
     # updater = Updater(os.environ['TELEGRAM_TOKEN'], use_context=True)
     updater = Updater('1773001800:AAHtAX5DUReFenUYgwpteZCfn4S66z-KFiY', use_context=True)
@@ -177,6 +232,7 @@ def main():
     dp.add_handler(CommandHandler("p", price))
     dp.add_handler(CommandHandler("time", tm_time))
     dp.add_handler(CommandHandler("t", tm_time))
+    dp.add_handler(CommandHandler("new_add", new_add, pass_args=True, pass_user_data=True))
 
     # dp.add_handler(CommandHandler("price_bogged", priceB))
     # dp.add_handler(CommandHandler("p_bogged", priceB))

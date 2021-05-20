@@ -3,7 +3,7 @@ import time
 import os
 import cloudscraper
 import json
-
+import datetime
 import requests
 import math
 import telegram
@@ -73,7 +73,12 @@ def tm_time(update, context):
     update.message.reply_text(text='Bot is waiting for your command...',  parse_mode=telegram.ParseMode.HTML)
 
 
+bs_scan_api_key = '41BHK17AWF7UHC7MU85F6IFFTIE6Y5P51G'
+
 def price(update, context):
+    today = datetime.date.today()
+    first_day = datetime.date(2021, 5, 12)
+
     global limit_time
 
     if not allow_reply():
@@ -92,6 +97,8 @@ def price(update, context):
     formatted_market_cap = 0
     transactions_count = 0
     transactions_change = 0
+    liquidity_usd = 0
+    liquidity_change = 0
     volume_usd = 0
     volume_change = 0
     price_usd = 0
@@ -102,10 +109,12 @@ def price(update, context):
         resJson = json.loads(scraper.get("https://api.dex.guru/v1/tokens/0xd948a2c11626a0efc25f4e0cea4986056ac41fed-bsc").text)
         print(resJson)
         name = resJson['symbol']
-        # transactions_count = resJson['txns24h']
-        # transactions_change = resJson['txns24hChange']
-        # volume_usd = resJson['volume24hUSD']
-        # volume_change = resJson['volumeChange24h']
+        transactions_count = resJson['txns24h']
+        transactions_change = resJson['txns24hChange']
+        liquidity_usd = resJson['liquidityUSD']
+        # liquidity_change = resJson['liquidityChange24h']
+        volume_usd = resJson['volume24hUSD']
+        volume_change = resJson['volumeChange24h']
         price = float(resJson['priceUSD'] * 1e6)
         price_change = resJson['priceChange24h']
 
@@ -123,18 +132,24 @@ def price(update, context):
 
     limit_time = time.time()
 
-    if err:
-        update.message.reply_text(text=f"         🚀   {name}   🚀\n\n"
-                                   f"💰  1M tokens: <b>${round(price, 8)}</b><i>({round(price / price_change * 100)}% last 24h)</i> \n"
-                                   f"💴  Market cap: <b>${formatted_market_cap}</b> \n"
-                                   f"💴  Supply: <b>{supply}t</b> \n",
-                                  parse_mode=telegram.ParseMode.HTML)
-    else:
+    urlPancake = 'https://exchange.pancakeswap.finance/#/swap?outputCurrency=0xd948a2c11626a0efc25f4e0cea4986056ac41fed&inputCurrency=BNB'
+    urlBogged = 'https://bogged.finance/swap?token=0xd948A2c11626a0EFC25f4e0ceA4986056AC41feD'
+    urlDexGuru = 'https://dex.guru/token/0xd948a2c11626a0efc25f4e0cea4986056ac41fed-bsc'
+    urlPoocoin = 'https://poocoin.app/tokens/0xd948a2c11626a0efc25f4e0cea4986056ac41fed'
+    num_days = today - first_day
+
+    if not err:
         update.message.reply_text(text=f"         🚀   {name}   🚀\n\n"
                                            f"💰  1M tokens: <b>${round(price, 8)}</b><i>({round(price / price_change * 100)}% last 24h)</i> \n"
                                            f"💴  Market cap: <b>${formatted_market_cap}</b> \n"
-                                           f"💴  Supply: <b>{supply}t</b> \n",
-                                  parse_mode=telegram.ParseMode.HTML)
+                                           f"💬  Transactions count (24h): <b>{round(transactions_count)}</b><i>({round(transactions_change * 100)}% last 24h)</i>\n"
+                                           f"📊  Volume (24h): <b>${round(volume_usd)}</b><i>({round(volume_change * 100)}% last 24h)</i>\n"
+                                           f"💸  Liquidity (24h): <b>${round(liquidity_usd)}</b>\n"
+                                           f"🎚  Supply: <b>{supply}t</b> \n"
+                                           f"🔄 Buy/Sell on <a href='{urlPancake}'>PancakeSwapV2</a> | <a href='{urlBogged}'>Bogged</a> | <a href='{urlDexGuru}'> Dex Guru</a>\n"
+                                           f"〽️ Charts on 💩 <a href='{urlPoocoin}'>PancakeSwapV2</a> | 📈 <a href='{urlBogged}'>Bogged</a> | 🛠 <a href='{urlDexGuru}'> Dex Guru</a>\n"
+                                           f"⏰ Time Since Launch {num_days.days} days ago\n",
+                                  parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 
 def error(update, context):

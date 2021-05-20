@@ -26,11 +26,11 @@ limit_time = 0
 
 current_add_idx = 0
 
-ADDS_FILE_NAME = 'adds.json'
+ADS_FILE_NAME = 'ads.json'
 
 def get_ads():
     try:
-        file = open(ADDS_FILE_NAME, 'r')
+        file = open(ADS_FILE_NAME, 'r')
         #
         adds = json.load(fp=file)
         #
@@ -39,13 +39,14 @@ def get_ads():
         return adds
 
     except:
+
         return {"count": 0, "list": []}
 
 
 def update_adds(add_to_add):
     updated_adds = get_ads()
 
-    file = open(ADDS_FILE_NAME, 'w')
+    file = open(ADS_FILE_NAME, 'w')
 
     updated_adds['list'].append(add_to_add)
     updated_adds['count'] = len(updated_adds['list'])
@@ -92,7 +93,7 @@ def help(update, context):
                                    '<b>/t</b> or <b>/time</b> Time until the bot will be released (anti-spam).\n'
                                    '<b>/help</b> helps you in finding the commands supported by the bot.\n\n'
                                    '<b>Sayan</b> mode:\n'
-                                   '<b>/new_ad ad_to_add</b> ad_to_add is a string containing the new ad to be pushed to the list\n'
+                                   '<b>/new_ad ad_to_add</b> (a string containing the new ad to be pushed to the list)\n'
                                    '<b>/get_ads</b> Shows all listed ads\n',
                               parse_mode=telegram.ParseMode.HTML
                               )

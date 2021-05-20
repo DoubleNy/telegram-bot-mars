@@ -24,21 +24,23 @@ limit_time = 0
 # add_4 = "<a href='https://t.me/x2pofficial'> X2POfficial </a> A New Revolution 💎 • LP Locked 🔒 • 6000 hodlers • 10 % to hodlers • Apple Giveaway ✅ • <a href='https://xenonpay.org/'> XenonPay.org </a>"
 # add_5 = " 👑<a href='https://bit.ly/3tTtEch'>United Emirate Decentralized Coin</a>👑 Supply Only 20M! Price=$0.01 💴 Make x100 🚀 Buy On <a href='https://bit.ly/3omXLHX'> PancakeSwap </a>"
 
-current_add_idx = 0
+current_ad_idx = 0
 
 ADS_FILE_NAME = 'ads.json'
+
 
 def get_ads():
     try:
         file = open(ADS_FILE_NAME, 'r')
         #
-        adds = json.load(fp=file)
+        ads = json.load(fp=file)
         #
         file.close()
 
-        return adds
+        return ads
 
     except:
+        print("error opening ads.json")
 
         return {"count": 0, "list": []}
 
@@ -137,13 +139,16 @@ def see_all_adds(update, context):
 
 
 def get_current_add():
-    global current_add_idx
+    global current_ad_idx
 
-    adds = get_ads()
+    ads = get_ads()
 
-    current_add = adds['list'][current_add_idx]
-    current_add_idx += 1
-    current_add_idx = current_add_idx % adds['count']
+    if ads['count'] == 0:
+        return
+
+    current_add = ads['list'][current_ad_idx]
+    current_ad_idx += 1
+    current_ad_idx = current_ad_idx % ads['count']
 
     return current_add
 

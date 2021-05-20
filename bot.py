@@ -45,15 +45,28 @@ def get_ads():
         return {"count": 0, "list": []}
 
 
-def update_adds(add_to_add):
-    updated_adds = get_ads()
+def update_ads(ad_to_add):
+    updated_ads = get_ads()
 
     file = open(ADS_FILE_NAME, 'w')
 
-    updated_adds['list'].append(add_to_add)
-    updated_adds['count'] = len(updated_adds['list'])
+    updated_ads['list'].append(ad_to_add)
+    updated_ads['count'] = len(updated_ads['list'])
 
-    json.dump(updated_adds, file)
+    json.dump(updated_ads, file)
+
+    file.close()
+
+
+def remove_ad(ad_id):
+    ads = get_ads()
+
+    file = open(ADS_FILE_NAME, 'w')
+
+    del ads['list'][ad_id]
+    ads['count'] = len(ads['list'])
+
+    json.dump(ads, file)
 
     file.close()
 
@@ -114,12 +127,25 @@ def tm_time(update, context):
     update.message.reply_text(text='Bot is waiting for your command...', parse_mode=telegram.ParseMode.HTML)
 
 
-def new_add(update, context):
-    add = ' '.join(context.args)
+def new_ad(update, context):
+    ad = ' '.join(context.args)
 
     if update.message.from_user.username in ['RUSSELL829', 'doubleny']:
-        update_adds(add)
+        update_ads(ad)
         update.message.reply_text(text='Ok. I have just added it.', parse_mode=telegram.ParseMode.HTML)
+    else:
+        update.message.reply_text(text='You are not allowed to do this.', parse_mode=telegram.ParseMode.HTML)
+
+
+def del_ad(update, context):
+    if len(context.args) < 1:
+        return
+
+    ad_id = int(context.args[0])
+
+    if update.message.from_user.username in ['RUSSELL829', 'doubleny']:
+        remove_ad(ad_id)
+        update.message.reply_text(text='Ok. I have just removed it.', parse_mode=telegram.ParseMode.HTML)
     else:
         update.message.reply_text(text='You are not allowed to do this.', parse_mode=telegram.ParseMode.HTML)
 
@@ -131,9 +157,11 @@ def see_all_adds(update, context):
 
     response = f'Number of ads: <b> {ads["count"]} </b> \n\n'
 
+    idx = 0
     for ad in ads_list:
-        response += ad
+        response += f"<b>{idx}</b>: {ad}"
         response += '\n\n'
+        idx+=1
 
     update.message.reply_text(text=response, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
@@ -258,7 +286,8 @@ def main():
     dp.add_handler(CommandHandler("p", price))
     dp.add_handler(CommandHandler("time", tm_time))
     dp.add_handler(CommandHandler("t", tm_time))
-    dp.add_handler(CommandHandler("new_ad", new_add, pass_args=True, pass_user_data=True))
+    dp.add_handler(CommandHandler("new_ad", new_ad, pass_args=True, pass_user_data=True))
+    dp.add_handler(CommandHandler("del_ad", del_ad, pass_args=True, pass_user_data=True))
     dp.add_handler(CommandHandler("get_ads", see_all_adds))
 
     # dp.add_handler(CommandHandler("price_bogged", priceB))

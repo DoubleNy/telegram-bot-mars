@@ -28,15 +28,18 @@ current_add_idx = 0
 
 ADDS_FILE_NAME = 'adds.json'
 
-
 def get_adds():
-    file = open(ADDS_FILE_NAME, 'r')
-    #
-    adds = json.load(fp=file)
-    #
-    file.close()
+    try:
+        file = open(ADDS_FILE_NAME, 'r')
+        #
+        adds = json.load(fp=file)
+        #
+        file.close()
 
-    return adds
+        return adds
+
+    except:
+        return {"count": 0, "list": []}
 
 
 def update_adds(add_to_add):

@@ -125,7 +125,7 @@ def get_current_add():
 
     current_add = adds['list'][current_add_idx]
     current_add_idx += 1
-    current_add_idx = current_add_idx % len(adds['count'])
+    current_add_idx = current_add_idx % adds['count']
 
     return current_add
 

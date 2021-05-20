@@ -28,7 +28,7 @@ current_add_idx = 0
 
 ADDS_FILE_NAME = 'adds.json'
 
-def get_adds():
+def get_ads():
     try:
         file = open(ADDS_FILE_NAME, 'r')
         #
@@ -43,7 +43,7 @@ def get_adds():
 
 
 def update_adds(add_to_add):
-    updated_adds = get_adds()
+    updated_adds = get_ads()
 
     file = open(ADDS_FILE_NAME, 'w')
 
@@ -90,7 +90,10 @@ def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text(text='<b>/p</b> or <b>/price</b> shows the price for SAFEMARSCASH.\n'
                                    '<b>/t</b> or <b>/time</b> Time until the bot will be released (anti-spam).\n'
-                                   '<b>/help</b> helps you in finding the commands supported by the bot.\n',
+                                   '<b>/help</b> helps you in finding the commands supported by the bot.\n\n'
+                                   '<b>Sayan</b> mode:\n'
+                                   '<b>/new_ad ad_to_add</b> ad_to_add is a string containing the new ad to be pushed to the list\n'
+                                   '<b>/get_ads</b> Shows all listed ads\n',
                               parse_mode=telegram.ParseMode.HTML
                               )
 
@@ -119,15 +122,23 @@ def new_add(update, context):
 
 
 def see_all_adds(update, context):
-    adds = get_adds()
+    ads = get_ads()
 
-    update.message.reply_text(text=f'{json.dumps(adds, indent=2)}', parse_mode=telegram.ParseMode.HTML)
+    ads_list = ads['list']
+
+    response = f'Number of ads: <b> {ads["count"]} </b> \n\n'
+
+    for ad in ads_list:
+        response += ad
+        response += '\n\n'
+
+    update.message.reply_text(text=response, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 
 def get_current_add():
     global current_add_idx
 
-    adds = get_adds()
+    adds = get_ads()
 
     current_add = adds['list'][current_add_idx]
     current_add_idx += 1
@@ -241,8 +252,8 @@ def main():
     dp.add_handler(CommandHandler("p", price))
     dp.add_handler(CommandHandler("time", tm_time))
     dp.add_handler(CommandHandler("t", tm_time))
-    dp.add_handler(CommandHandler("new_add", new_add, pass_args=True, pass_user_data=True))
-    dp.add_handler(CommandHandler("all_adds", see_all_adds))
+    dp.add_handler(CommandHandler("new_ad", new_add, pass_args=True, pass_user_data=True))
+    dp.add_handler(CommandHandler("get_ads", see_all_adds))
 
     # dp.add_handler(CommandHandler("price_bogged", priceB))
     # dp.add_handler(CommandHandler("p_bogged", priceB))

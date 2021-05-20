@@ -155,7 +155,7 @@ def get_current_add():
 
 def price(update, context):
     today = datetime.date.today()
-    first_day = datetime.date(2021, 5, 12)
+    first_day = datetime.date(2021, 5, 11)
 
     global limit_time
 
@@ -228,7 +228,7 @@ def price(update, context):
                                        f"🎚  Supply: <b>{coin_supply}t</b> \n"
                                        f"🔄  Buy/Sell on <a href='{url_pancake}'>PancakeSwapV2</a> | <a href='{url_bogged}'>Bogged</a> | <a href='{url_dexguru}'> Dex Guru</a>\n"
                                        f"〽️  Charts on 💩 <a href='{url_poocoin}'>PancakeSwapV2</a> | 📈 <a href='{url_bogged}'>Bogged</a> | 🛠 <a href='{url_dexguru}'> Dex Guru</a>\n"
-                                       f"⏰  Time Since Launch {num_days.days} days ago\n\n"
+                                       f"⏰  Time Since Launch {num_days.days} days\n\n"
                                        f"<i>{get_current_add()}</i>\n",
                                   parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
